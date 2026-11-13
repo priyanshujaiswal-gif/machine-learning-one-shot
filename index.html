@@ -1,0 +1,1077 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Machine Learning, One Shot</title>
+<style>
+:root{
+  --text:#1d1d1f; --text2:#6e6e73; --bg:#fff; --bg2:#f5f5f7; --dark:#000;
+  --blue:#0066cc; --btn:#0071e3; --btnh:#0077ed; --hair:#d2d2d7;
+  --red:#d70015; --green:#248a3d; --orange:#b25000;
+  --r:22px; --pill:980px;
+  --font:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:64px;font-size:100%}
+html.present{font-size:118%}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{animation:none!important;transition:none!important}}
+body{margin:0;font-family:var(--font);color:var(--text);background:var(--bg);line-height:1.47;font-size:17px;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;font-size:inherit;cursor:pointer;color:inherit}
+h1,h2,h3{margin:0;font-weight:600}
+h1{font-size:clamp(44px,8vw,84px);line-height:1.04;letter-spacing:-.02em}
+h2{font-size:clamp(32px,5vw,52px);line-height:1.08;letter-spacing:-.012em}
+h3{font-size:22px;line-height:1.2;letter-spacing:-.005em}
+p{margin:0}
+.wrap{max-width:1020px;margin:0 auto;padding:0 22px}
+section.band{padding:110px 0}
+section.alt{background:var(--bg2)}
+section.black{background:#000;color:#f5f5f7}
+.eyebrow{font-size:14px;font-weight:600;color:var(--text2);letter-spacing:.02em;text-transform:uppercase;margin-bottom:12px}
+.black .eyebrow{color:#a1a1a6}
+.head{text-align:center;max-width:760px;margin:0 auto 56px}
+.head p.sub{font-size:clamp(19px,2.4vw,26px);line-height:1.25;color:var(--text2);margin-top:16px}
+.black .head p.sub{color:#a1a1a6}
+.pill{display:inline-block;background:var(--btn);color:#fff;padding:9px 20px;border-radius:var(--pill);text-decoration:none;border:0;transition:background .2s}
+.pill:hover{background:var(--btnh)}
+.pill.ghost{background:transparent;color:var(--blue);border:1px solid var(--blue)}
+.pill.ghost:hover{background:rgba(0,102,204,.08)}
+.pill.sm{padding:6px 14px;font-size:15px}
+.link{color:var(--blue);text-decoration:none;background:none;border:0;padding:0}
+.link::after{content:" \203A"}
+.link:hover{text-decoration:underline}
+.black .link{color:#2997ff}
+.card{background:#fff;border-radius:var(--r);padding:32px}
+.alt .card{background:#fff}
+.band:not(.alt):not(.black) .card{background:var(--bg2)}
+.small{font-size:14px;color:var(--text2)}
+.mono{font-family:var(--mono)}
+.tag{display:inline-block;font-size:12px;font-weight:600;padding:3px 10px;border-radius:var(--pill);background:#e8e8ed;color:var(--text2)}
+.tag.blue{background:#e5f0fb;color:var(--blue)}
+.tag.green{background:#e3f4e8;color:var(--green)}
+.tag.red{background:#fde8ea;color:var(--red)}
+.tag.orange{background:#fdeedd;color:var(--orange)}
+.row{display:flex;gap:16px;flex-wrap:wrap;align-items:center}
+.center{text-align:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:820px){.grid2,.grid3{grid-template-columns:1fr}section.band{padding:72px 0}}
+
+/* nav */
+#bar{position:fixed;top:0;left:0;height:3px;background:var(--btn);width:0;z-index:60;transition:width .15s}
+nav.top{position:sticky;top:0;z-index:50;background:rgba(255,255,255,.8);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid rgba(0,0,0,.08)}
+nav.top .in{max-width:1020px;margin:0 auto;padding:0 22px;height:48px;display:flex;align-items:center;gap:6px;overflow-x:auto;scrollbar-width:none}
+nav.top .in::-webkit-scrollbar{display:none}
+nav.top b{font-weight:600;font-size:15px;margin-right:auto;white-space:nowrap;padding-right:14px}
+nav.top a{font-size:13px;color:var(--text2);text-decoration:none;padding:6px 10px;border-radius:var(--pill);white-space:nowrap;transition:color .2s,background .2s}
+nav.top a:hover{color:var(--text)}
+nav.top a.on{color:var(--text);background:rgba(0,0,0,.06)}
+#presentBtn{font-size:12px;border:1px solid var(--hair);background:transparent;border-radius:var(--pill);padding:4px 12px;color:var(--text2);white-space:nowrap}
+#presentBtn[aria-pressed=true]{background:var(--text);color:#fff;border-color:var(--text)}
+
+/* hero */
+.hero{background:#000;color:#f5f5f7;text-align:center;padding:120px 0 100px;overflow:hidden}
+.hero .sub{font-size:clamp(21px,3vw,30px);color:#a1a1a6;margin:22px auto 34px;max-width:640px;line-height:1.2}
+.hero .row{justify-content:center;gap:26px}
+.hero .steps8{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:70px}
+.hero .steps8 span{width:44px;height:44px;border-radius:50%;border:1px solid #424245;display:grid;place-items:center;font-size:15px;color:#a1a1a6;opacity:0;transform:translateY(10px);animation:pop .5s forwards}
+@keyframes pop{to{opacity:1;transform:none}}
+.hero .cap{margin-top:14px;font-size:14px;color:#6e6e73}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(24px);transition:opacity .8s ease,transform .8s ease}
+.rv.in{opacity:1;transform:none}
+
+/* flow diagram */
+.seg{display:inline-flex;background:#e8e8ed;border-radius:var(--pill);padding:3px}
+.seg button{border:0;background:transparent;padding:7px 18px;border-radius:var(--pill);color:var(--text2);font-size:15px;transition:all .2s}
+.seg button.on{background:#fff;color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.flow{display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:12px;align-items:center;margin:34px 0 10px}
+.flow .box{border-radius:18px;padding:22px 14px;text-align:center;background:var(--bg2);border:2px solid transparent;transition:all .4s}
+.flow .box.you{border-color:var(--btn);background:#eaf3fd}
+.flow .box.mid{background:#1d1d1f;color:#fff}
+.flow .arr{font-size:26px;color:var(--text2);transition:transform .4s}
+.flow .box b{display:block;font-size:19px}
+.flow .box span{font-size:14px;color:var(--text2)}
+.flow .box.mid span{color:#a1a1a6}
+@media(max-width:700px){.flow{grid-template-columns:1fr;}.flow .arr{transform:rotate(90deg);text-align:center}}
+
+/* range */
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:4px;background:#d2d2d7;border-radius:4px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:#fff;border:1px solid #c7c7cc;box-shadow:0 2px 6px rgba(0,0,0,.2);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:1px solid #c7c7cc;box-shadow:0 2px 6px rgba(0,0,0,.2);cursor:pointer}
+label.fld{display:block;font-size:14px;color:var(--text2);margin-bottom:6px}
+select{font-family:inherit;font-size:16px;padding:9px 12px;border-radius:12px;border:1px solid var(--hair);background:#fff;color:var(--text);width:100%}
+.big{font-size:clamp(40px,6vw,64px);font-weight:600;letter-spacing:-.02em;line-height:1.05}
+
+/* tiles */
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:28px}
+.chip{border:1px solid var(--hair);background:#fff;border-radius:var(--pill);padding:7px 16px;font-size:15px;color:var(--text2);transition:all .2s}
+.chip.on{background:var(--text);color:#fff;border-color:var(--text)}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.tiles{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.tiles{grid-template-columns:1fr}}
+.tile{background:#fff;border-radius:var(--r);padding:22px 20px;text-align:left;border:0;min-height:190px;display:flex;flex-direction:column;gap:8px;transition:transform .25s,box-shadow .25s,opacity .3s}
+.tile:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.tile.hide{display:none}
+.tile .ic{font-size:32px;line-height:1}
+.tile h3{font-size:19px}
+.tile p{font-size:15px;color:var(--text2)}
+.tile .more{display:none;font-size:14px;color:var(--text);border-top:1px solid var(--hair);padding-top:10px;margin-top:auto}
+.tile.open .more{display:block}
+.tile .go{font-size:14px;color:var(--blue);margin-top:auto}
+.tile.open .go{display:none}
+
+/* tabs */
+.tabs{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:24px}
+.tabbtn{border:1px solid var(--hair);background:#fff;border-radius:var(--pill);padding:8px 18px;font-size:15px;color:var(--text2);transition:all .2s}
+.tabbtn.on{background:var(--btn);border-color:var(--btn);color:#fff}
+.tabbtn.star::after{content:" ★"}
+.pane{display:none}.pane.on{display:block;animation:fade .4s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* game */
+.game{max-width:560px;margin:0 auto;text-align:center}
+.game .q{font-size:clamp(22px,3.2vw,30px);font-weight:600;letter-spacing:-.01em;min-height:76px;display:grid;place-items:center;line-height:1.2}
+.game .opts{display:flex;gap:12px;justify-content:center;margin:20px 0}
+.game .opts button{flex:1;max-width:220px;padding:14px;border-radius:16px;border:2px solid var(--hair);background:#fff;font-size:17px;font-weight:600;transition:all .2s}
+.game .opts button:hover:not(:disabled){border-color:var(--btn)}
+.game .opts button.right{border-color:var(--green);background:#e3f4e8}
+.game .opts button.wrong{border-color:var(--red);background:#fde8ea}
+.game .fb{min-height:46px;font-size:15px;color:var(--text2)}
+.dots{display:flex;gap:6px;justify-content:center;margin-bottom:18px}
+.dots i{width:10px;height:10px;border-radius:50%;background:#d2d2d7}
+.dots i.ok{background:var(--green)}.dots i.no{background:var(--red)}.dots i.cur{background:var(--btn)}
+
+/* stepper */
+.stepnav{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 14px;scrollbar-width:none;justify-content:center;flex-wrap:wrap}
+.stepnav::-webkit-scrollbar{display:none}
+.sbtn{display:flex;align-items:center;gap:8px;border:1px solid var(--hair);background:#fff;border-radius:var(--pill);padding:7px 14px 7px 8px;font-size:14px;color:var(--text2);white-space:nowrap;transition:all .2s}
+.sbtn i{font-style:normal;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#e8e8ed;font-size:13px;font-weight:600;color:var(--text2);transition:all .2s}
+.sbtn.on{background:var(--text);color:#fff;border-color:var(--text)}
+.sbtn.on i{background:#fff;color:var(--text)}
+.sbtn.done i{background:var(--btn);color:#fff}
+.sbtn.done.on i{background:#fff;color:var(--text)}
+.sprog{height:3px;background:#e8e8ed;border-radius:3px;margin:0 0 30px;overflow:hidden}
+.sprog div{height:100%;background:var(--btn);width:12.5%;transition:width .4s}
+.spanel{display:none}.spanel.on{display:block;animation:fade .45s}
+.shead{margin-bottom:26px}
+.shead .num{font-size:14px;font-weight:600;color:var(--btn);margin-bottom:6px}
+.shead h3{font-size:clamp(28px,4vw,40px);letter-spacing:-.012em;line-height:1.1}
+.why{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:22px 0 28px}
+@media(max-width:760px){.why{grid-template-columns:1fr}}
+.why div{background:#fff;border-radius:18px;padding:18px 20px;font-size:16px}
+.why b{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--text2);margin-bottom:4px}
+.lab{background:#fff;border-radius:var(--r);padding:28px;margin-bottom:20px}
+.lab>h4{margin:0 0 4px;font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--btn)}
+.lab>.t{font-size:20px;font-weight:600;margin-bottom:16px;letter-spacing:-.005em}
+.stepfoot{display:flex;justify-content:space-between;align-items:center;margin-top:30px}
+#prevStep::after{content:none}
+#prevStep::before{content:"\2039  "}
+#build .grid3>.stat{background:#fff}
+.mdl{display:flex;flex-wrap:wrap;gap:6px;margin-top:16px;align-items:center}.mdl small{width:100%;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text2)}.mdl .tag{font-size:13px;padding:4px 12px;font-weight:500}
+.kbd{font-size:12px;border:1px solid var(--hair);border-radius:6px;padding:1px 6px;color:var(--text2);background:#fff}
+
+/* code */
+.code{background:#1d1d1f;color:#f5f5f7;border-radius:18px;overflow:hidden;margin-top:6px}
+.code .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#2c2c2e;font-size:12px;color:#a1a1a6}
+.code .bar i{width:11px;height:11px;border-radius:50%;background:#48484a;display:inline-block}
+.code .bar span{margin-left:6px;margin-right:auto}
+.code .bar button{background:#3a3a3c;border:0;color:#f5f5f7;padding:4px 12px;border-radius:var(--pill);font-size:12px}
+.code .bar button:hover{background:#48484a}
+.code pre{margin:0;padding:18px 20px;overflow-x:auto;font-family:var(--mono);font-size:14px;line-height:1.6;white-space:pre}
+.code .c{color:#8e8e93}.code .k{color:#ff9f0a}.code .s{color:#30d158}.code .n{color:#64d2ff}
+.out{background:#fff;border:1px solid var(--hair);border-radius:12px;padding:12px 16px;font-family:var(--mono);font-size:13px;white-space:pre-wrap;color:var(--text);margin-top:12px;min-height:44px;overflow-x:auto}
+
+/* tables */
+.tw{overflow-x:auto;border-radius:14px;border:1px solid var(--hair);background:#fff}
+table.d{border-collapse:collapse;width:100%;font-size:14px;white-space:nowrap}
+table.d th{background:#fafafc;text-align:left;font-weight:600;padding:9px 14px;border-bottom:1px solid var(--hair);color:var(--text2);font-size:13px}
+table.d td{padding:8px 14px;border-bottom:1px solid #efeff2}
+table.d tr:last-child td{border-bottom:0}
+table.d td.nul{background:#fde8ea;color:var(--red);font-weight:600}
+table.d td.bad{background:#fdeedd;color:var(--orange);font-weight:600}
+table.d td.ok{background:#e3f4e8}
+table.d tr.gone{opacity:.25;text-decoration:line-through}
+table.d .idx{color:#a1a1a6}
+
+/* column chips */
+.colchips{display:flex;gap:10px;flex-wrap:wrap}
+.cc{border:2px solid var(--hair);background:#fff;border-radius:16px;padding:10px 16px;text-align:left;min-width:140px;transition:all .2s}
+.cc b{display:block;font-size:15px}
+.cc span{font-size:13px;color:var(--text2)}
+.cc:hover{border-color:#a1a1a6}
+.cc.X{border-color:var(--btn);background:#eaf3fd}
+.cc.y{border-color:#1d1d1f;background:#1d1d1f;color:#fff}.cc.y span{color:#a1a1a6}
+.cc.sel{border-color:var(--btn)}
+.verdict{margin-top:14px;font-size:16px;min-height:50px}
+
+/* dots grid */
+.dgrid{display:grid;grid-template-columns:repeat(20,1fr);gap:5px;max-width:520px;margin:0 auto 18px}
+.dgrid i{aspect-ratio:1;border-radius:50%;background:var(--btn);transition:background .25s,transform .25s}
+.dgrid i.t{background:#c7c7cc}
+.bars{display:grid;gap:10px}
+.bar2{display:grid;grid-template-columns:110px 1fr 48px;gap:10px;align-items:center;font-size:14px}
+.bar2 .tr{height:12px;border-radius:8px;background:#e8e8ed;overflow:hidden}
+.bar2 .tr div{height:100%;background:var(--btn);border-radius:8px;transition:width .6s}
+.bar2 .tr div.g{background:#a1a1a6}
+canvas{width:100%;display:block;border-radius:14px;background:#fff;touch-action:none}
+.stat{background:var(--bg2);border-radius:18px;padding:18px 20px}
+.alt .stat,.lab .stat{background:var(--bg2)}
+.stat b{display:block;font-size:30px;letter-spacing:-.015em;font-weight:600;line-height:1.1}
+.stat span{font-size:14px;color:var(--text2)}
+.eq{font-family:var(--mono);font-size:14px;background:var(--bg2);border-radius:14px;padding:14px 16px;line-height:1.9;overflow-x:auto}
+.eq .p{color:var(--btn)}.eq .m{color:var(--red)}
+.callout{background:#fff8e6;border-radius:14px;padding:14px 18px;font-size:15px;margin-top:16px}
+.callout b{font-weight:600}
+.cm{display:grid;grid-template-columns:auto 1fr 1fr;gap:8px;max-width:440px;margin:0 auto;text-align:center;font-size:14px}
+.cm .cell{border-radius:14px;padding:18px 8px;border:2px solid transparent;transition:all .2s}
+.cm .cell b{display:block;font-size:30px;font-weight:600}
+.cm .cell.good{background:#e3f4e8}.cm .cell.bad{background:#fde8ea}
+.cm .cell:hover{border-color:var(--text)}
+.cm .h{color:var(--text2);align-self:center;font-size:13px}
+.gauge{height:18px;border-radius:12px;background:#e8e8ed;position:relative;overflow:visible}
+.gauge div.f{height:100%;border-radius:12px;background:var(--btn);transition:width .3s}
+.gauge div.th{position:absolute;top:-6px;width:3px;height:30px;background:var(--text);border-radius:2px;transition:left .2s}
+.seg2{display:inline-flex;gap:6px}
+.seg2 button{border:2px solid var(--hair);background:#fff;border-radius:14px;padding:8px 16px;font-size:15px}
+.seg2 button.on{border-color:var(--btn);background:#eaf3fd}
+.heat{display:grid;grid-template-columns:auto repeat(3,1fr);gap:6px;font-size:14px;text-align:center;align-items:center}
+.heat div.c{border-radius:12px;padding:14px 4px;font-weight:600;font-size:20px;cursor:pointer;border:2px solid transparent}
+.heat div.c small{display:block;font-size:11px;font-weight:400;opacity:.75}
+.heat div.c.on{border-color:var(--text)}
+
+/* homework */
+.hw{display:grid;gap:10px}
+.hw label{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:16px;padding:16px 18px;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.hw label:hover{border-color:var(--hair)}
+.hw input{width:22px;height:22px;margin-top:2px;accent-color:var(--btn);flex:none}
+.hw label.done{background:#f0f8f2}.hw label.done .tx{color:var(--text2);text-decoration:line-through}
+.hw .tx b{display:block}
+.ring{width:84px;height:84px;position:relative;flex:none}
+.ring svg{transform:rotate(-90deg)}
+.ring span{position:absolute;inset:0;display:grid;place-items:center;font-weight:600;font-size:18px}
+details{background:#fff;border-radius:16px;padding:16px 20px;margin-top:12px}
+details summary{cursor:pointer;font-weight:600;list-style:none}
+details summary::after{content:" \203A";color:var(--blue)}
+details[open] summary::after{content:" \2304"}
+details p,details ul{margin-top:10px;font-size:15px;color:var(--text2)}
+details ul{padding-left:20px}
+
+/* flip cards */
+.flips{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){.flips{grid-template-columns:repeat(2,1fr)}}
+.flip{perspective:900px;height:150px;background:none;border:0;padding:0}
+.flip .in{position:relative;width:100%;height:100%;transition:transform .6s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:var(--r);padding:18px;display:flex;flex-direction:column;justify-content:center;text-align:left}
+.flip .f{background:#fff}
+.flip .f b{font-size:13px;color:var(--btn)}.flip .f span{font-size:19px;font-weight:600;line-height:1.2;margin-top:4px}
+.flip .b{background:#1d1d1f;color:#f5f5f7;transform:rotateY(180deg);font-family:var(--mono);font-size:12.5px;line-height:1.5}
+
+/* quiz */
+.quiz{max-width:640px;margin:0 auto}
+.quiz .q{font-size:clamp(21px,3vw,28px);font-weight:600;line-height:1.2;margin:10px 0 20px;letter-spacing:-.01em}
+.quiz .o{display:block;width:100%;text-align:left;border:2px solid var(--hair);background:#fff;border-radius:16px;padding:14px 18px;margin-bottom:10px;font-size:16px;transition:all .2s}
+.quiz .o:hover:not(:disabled){border-color:var(--btn)}
+.quiz .o.right{border-color:var(--green);background:#e3f4e8}
+.quiz .o.wrong{border-color:var(--red);background:#fde8ea}
+.quiz .ex{font-size:15px;color:var(--text2);margin:6px 0 16px;min-height:22px}
+footer{padding:60px 0;text-align:center;font-size:13px;color:var(--text2);background:var(--bg2)}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav class="top"><div class="in">
+  <b>ML · One Shot</b>
+  <a href="#intro">Intro</a><a href="#where">Where</a><a href="#what">What</a><a href="#build">Build</a><a href="#classify">Classification</a><a href="#homework">Homework</a><a href="#recap">Recap</a>
+  <button id="presentBtn" aria-pressed="false" title="Larger text for the projector">Presenter mode</button>
+</div></nav>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow" style="color:#a1a1a6">A hands-on guide</div>
+    <h1>Machine learning.<br>One shot.</h1>
+    <p class="sub">Eight steps. One real dataset. Build a model that predicts salary.</p>
+    <div class="row">
+      <a class="pill" href="#intro">Start</a>
+      <a class="link" href="#homework" style="color:#2997ff">Jump to homework</a>
+    </div>
+    <div class="steps8" id="heroSteps"></div>
+    <div class="cap">The eight steps we’ll walk through together.</div>
+  </div>
+</header>
+
+<!-- INTRO -->
+<section class="band" id="intro"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">01 · Introduction</div><h2>Don’t write the rules.<br>Show examples.</h2><p class="sub">That’s the whole idea of machine learning.</p></div>
+
+  <div class="card rv center">
+    <div class="seg" id="paradigm"><button class="on" data-m="old">Traditional programming</button><button data-m="ml">Machine learning</button></div>
+    <div class="flow" id="flow"></div>
+    <p id="flowTxt" style="max-width:600px;margin:14px auto 0;color:var(--text2)"></p>
+  </div>
+
+  <div class="card rv" style="margin-top:20px">
+    <div class="grid2" style="align-items:center;gap:36px">
+      <div>
+        <div class="eyebrow">Try it · You are the model</div>
+        <h3>Five people. Their salaries.</h3>
+        <p style="color:var(--text2);margin-top:10px">Study the examples. Then guess the salary of someone with <b style="color:var(--text)">8 years</b> of experience.</p>
+        <div class="tw" style="margin-top:18px"><table class="d">
+          <tr><th>Years of experience</th><th>Salary</th></tr>
+          <tr><td>1</td><td>$50,000</td></tr><tr><td>3</td><td>$80,000</td></tr><tr><td>5</td><td>$100,000</td></tr><tr><td>12</td><td>$160,000</td></tr><tr><td>18</td><td>$182,000</td></tr>
+        </table></div>
+      </div>
+      <div class="center">
+        <div class="small">Your guess for 8 years</div>
+        <div class="big" id="gv">$110,000</div>
+        <div style="margin:18px 0"><input type="range" id="guess" min="30000" max="250000" step="1000" value="110000" aria-label="Your salary guess"></div>
+        <button class="pill" id="gbtn">Reveal</button>
+        <div id="gout" style="margin-top:18px;font-size:16px;min-height:96px"></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- WHERE -->
+<section class="band alt" id="where"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">02 · In daily life</div><h2>You’ve used it before breakfast.</h2><p class="sub">Tap a tile. Every one predicts either a number or a category.</p></div>
+  <div class="chips" id="tileChips">
+    <button class="chip on" data-f="all">Everything</button><button class="chip" data-f="num">Predicts a number</button><button class="chip" data-f="cat">Predicts a category</button>
+  </div>
+  <div class="tiles" id="tiles"></div>
+</div></section>
+
+<!-- WHAT -->
+<section class="band" id="what"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">03 · What is it, exactly?</div><h2>Learning from data.</h2><p class="sub">Every prediction is one of two kinds.</p></div>
+  <div class="card rv">
+    <div class="grid2">
+      <div class="stat" style="background:#fff"><span class="tag blue">Regression</span><b style="margin-top:10px">Predicts a number</b><span>Salary, price, delivery time, sales next week.</span><div class="mdl"><small>Example models</small><span class="tag blue">Linear Regression</span><span class="tag blue">Decision Tree</span><span class="tag blue">Random Forest</span><span class="tag blue">Gradient Boosting</span><span class="tag blue">Support Vector Regression</span></div></div>
+      <div class="stat" style="background:#fff"><span class="tag green">Classification</span><b style="margin-top:10px">Predicts a category</b><span>Spam or not. Fraud or not. Survived or not.</span><div class="mdl"><small>Example models</small><span class="tag green">Logistic Regression</span><span class="tag green">Decision Tree</span><span class="tag green">Random Forest</span><span class="tag green">K-Nearest Neighbours</span><span class="tag green">Support Vector Machine</span><span class="tag green">Naive Bayes</span></div></div>
+    </div>
+    <p class="small" style="margin-top:16px">Today: regression, live. Classification: your homework.</p>
+  </div>
+
+  <div class="card rv" style="margin-top:20px;padding:40px 24px">
+    <div class="center"><div class="eyebrow">Game · Number or category?</div></div>
+    <div class="game" id="nc">
+      <div class="dots" id="ncDots"></div>
+      <div class="q" id="ncQ"></div>
+      <div class="opts"><button data-a="num">A number</button><button data-a="cat">A category</button></div>
+      <div class="fb" id="ncFb"></div>
+      <button class="pill sm" id="ncNext" style="display:none">Next</button>
+    </div>
+  </div>
+
+  <div class="card rv" style="margin-top:20px">
+    <div class="grid3">
+      <div><div class="eyebrow">Features</div><h3>The clues</h3><p style="color:var(--text2);margin-top:8px">Columns the model looks at. Age, experience, education. Often called <span class="mono">X</span>.</p></div>
+      <div><div class="eyebrow">Target</div><h3>The answer</h3><p style="color:var(--text2);margin-top:8px">The column we want to predict. Salary. Often called <span class="mono">y</span>.</p></div>
+      <div><div class="eyebrow">Model</div><h3>The pattern-finder</h3><p style="color:var(--text2);margin-top:8px">A formula that turns clues into an answer. Training tunes it.</p></div>
+    </div>
+  </div>
+</div></section>
+
+<!-- BUILD -->
+<section class="band alt" id="build"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">04 · Build your own model</div><h2>Eight steps.<br>Theory, then Colab.</h2><p class="sub">We predict salary from <b style="color:var(--text)">age, gender, education and experience</b>. Real data: <span class="mono" style="font-size:.8em">Salary_Data.csv</span>, 6,704 people.</p></div>
+  <div class="stepnav" id="stepnav"></div>
+  <div class="sprog"><div id="sprog"></div></div>
+
+  <!-- STEP 1 -->
+  <div class="spanel on" data-s="1">
+    <div class="shead"><div class="num">Step 1 of 8</div><h3>Define the problem</h3></div>
+    <div class="why"><div><b>What it is</b>Decide exactly what you want to predict, and what you’ll use to predict it.</div><div><b>Why it matters</b>A vague question gives a useless model. The target decides everything that follows.</div></div>
+    <div class="lab"><h4>Try it</h4><div class="t">Our dataset has six columns. Which one would you predict?</div>
+      <div class="colchips" id="s1chips"></div>
+      <div class="verdict" id="s1v"></div>
+    </div>
+    <div class="code" data-code="# Goal: predict Salary (a number)
+# from Age, Gender, Education Level, Years of Experience"><div class="bar"><i></i><i></i><i></i><span>Colab · just a note for today</span><button>Copy</button></div><pre></pre></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="spanel" data-s="2">
+    <div class="shead"><div class="num">Step 2 of 8</div><h3>Load the data</h3></div>
+    <div class="why"><div><b>What it is</b>Read the file into a table (a DataFrame) and take a first look.</div><div><b>Why it matters</b>You can’t fix what you haven’t seen. Size, columns and gaps show up in seconds.</div></div>
+    <div class="lab"><h4>Try it</h4><div class="t">Run each command. See what Colab would show.</div>
+      <div class="row" style="margin-bottom:14px"><button class="pill sm" data-cmd="head">df.head()</button><button class="pill sm" data-cmd="shape">df.shape</button><button class="pill sm" data-cmd="info">df.info()</button></div>
+      <div id="s2out"></div>
+    </div>
+    <div class="code" data-code="import pandas as pd
+
+url = &quot;https://raw.githubusercontent.com/priyanshujaiswal-gif/machine-learning-one-shot/main/Salary_Data.csv&quot;
+df = pd.read_csv(url)
+df.head()
+df.shape
+df.info()"><div class="bar"><i></i><i></i><i></i><span>Colab · loads straight from the link, no upload needed</span><button>Copy</button></div><pre></pre></div>
+    
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="spanel" data-s="3">
+    <div class="shead"><div class="num">Step 3 of 8</div><h3>Clean the data</h3></div>
+    <div class="why"><div><b>What it is</b>Fix gaps, typos and columns that don’t help.</div><div><b>Why it matters</b>Models can’t handle blanks, and they treat <span class="mono">phD</span> and <span class="mono">PhD</span> as two different things. Garbage in, garbage out.</div></div>
+    <div class="lab"><h4>Try it</h4><div class="t">Real rows from the file. Orange and red cells are problems. Apply the fixes.</div>
+      <div class="row" style="margin-bottom:14px" id="s3btns">
+        <button class="pill sm ghost" data-fix="title">1 · Drop Job Title</button>
+        <button class="pill sm ghost" data-fix="na">2 · Drop rows with blanks</button>
+        <button class="pill sm ghost" data-fix="edu">3 · Fix education labels</button>
+        <button class="link" id="s3reset">Reset</button>
+      </div>
+      <div class="tw"><table class="d" id="s3t"></table></div>
+      <div class="row" style="margin-top:14px;justify-content:space-between"><div id="s3c" class="small"></div><div class="small">Full file: <b style="color:var(--text)">6,704</b> rows → <b style="color:var(--text)" id="s3n">6,704</b> after your fixes</div></div>
+      <div class="callout"><b>Why drop Job Title?</b> It has hundreds of unique values. Converting it would add hundreds of columns. We keep today simple. As a stretch goal, you can try it later.</div>
+    </div>
+    <div class="code" data-code="df = df.drop(columns=&quot;Job Title&quot;)
+df = df.dropna()
+
+df[&quot;Education Level&quot;] = df[&quot;Education Level&quot;].replace({
+    &quot;Bachelor's Degree&quot;: &quot;Bachelor's&quot;,
+    &quot;Master's Degree&quot;: &quot;Master's&quot;,
+    &quot;phD&quot;: &quot;PhD&quot;})
+
+df.describe()"><div class="bar"><i></i><i></i><i></i><span>Colab</span><button>Copy</button></div><pre></pre></div>
+    <p class="small" style="margin-top:10px">Check <span class="mono">df[&quot;Education Level&quot;].value_counts()</span> first, to see the messy labels yourself. Also look at <span class="mono">df.describe()</span>: the minimum salary is $350. Is that real? Good discussion question.</p>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="spanel" data-s="4">
+    <div class="shead"><div class="num">Step 4 of 8</div><h3>Turn words into numbers</h3></div>
+    <div class="why"><div><b>What it is</b>Replace text columns (Gender, Education) with numeric ones.</div><div><b>Why it matters</b>Models do arithmetic. They can’t multiply “Master’s” by anything.</div></div>
+    <div class="lab"><h4>Try it</h4><div class="t">Every text value gets a number. Tap a row to see it change.</div>
+      <div class="grid2" style="gap:24px" id="encOut"></div>
+    </div>
+    <div class="code" data-code="df[&quot;Education Level&quot;] = df[&quot;Education Level&quot;].map(
+    {&quot;High School&quot;: 0, &quot;Bachelor's&quot;: 1, &quot;Master's&quot;: 2, &quot;PhD&quot;: 3})
+
+df[&quot;Gender&quot;] = df[&quot;Gender&quot;].map({&quot;Female&quot;: 0, &quot;Male&quot;: 1, &quot;Other&quot;: 2})
+df.head()"><div class="bar"><i></i><i></i><i></i><span>Colab</span><button>Copy</button></div><pre></pre></div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="spanel" data-s="5">
+    <div class="shead"><div class="num">Step 5 of 8</div><h3>Separate clues from the answer</h3></div>
+    <div class="why"><div><b>What it is</b>Split the table in two: <span class="mono">X</span> (the features) and <span class="mono">y</span> (the target).</div><div><b>Why it matters</b>The model needs to know which columns to learn from and which to predict. If the answer leaks into X, it cheats.</div></div>
+    <div class="lab"><h4>Try it</h4><div class="t">Tap each column to label it: clue (X) or answer (y).</div>
+      <div class="colchips" id="s5chips"></div>
+      <div class="row" style="margin-top:16px"><button class="pill sm" id="s5check">Check</button><span id="s5v" style="font-size:16px"></span></div>
+    </div>
+    <div class="code" data-code="X = df.drop(columns=&quot;Salary&quot;)
+y = df[&quot;Salary&quot;]"><div class="bar"><i></i><i></i><i></i><span>Colab</span><button>Copy</button></div><pre></pre></div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="spanel" data-s="6">
+    <div class="shead"><div class="num">Step 6 of 8</div><h3>Hide an exam</h3></div>
+    <div class="why"><div><b>What it is</b>Split the rows: most to train on, the rest kept hidden to test on.</div><div><b>Why it matters</b>A model can memorise its training data. Only unseen data shows whether it truly learned.</div></div>
+    <div class="grid2">
+      <div class="lab"><h4>Try it · The split</h4><div class="t">How much to hold back?</div>
+        <div class="dgrid" id="dgrid"></div>
+        <div class="row" style="justify-content:space-between;font-size:15px;margin-bottom:10px"><span><b style="color:var(--btn)">●</b> Train: <b id="ntr"></b></span><span><b style="color:#a1a1a6">●</b> Test: <b id="nte"></b></span></div>
+        <input type="range" id="split" min="10" max="40" step="5" value="20" aria-label="Test percentage"><div class="center small" style="margin-top:8px">Test size: <b id="splitv" style="color:var(--text)">20%</b> · common choice: 20%</div>
+      </div>
+      <div class="lab"><h4>Why it matters</h4><div class="t">Two students. Same practice paper.</div>
+        <div class="seg2" id="stud"><button class="on" data-st="a">Understood it</button><button data-st="b">Memorised it</button></div>
+        <div class="bars" id="studBars" style="margin-top:20px"></div>
+        <p class="small" id="studTxt" style="margin-top:14px"></p>
+        <p class="small" style="margin-top:8px">Illustrative numbers.</p>
+      </div>
+    </div>
+    <div class="code" id="s6code" style="margin-top:0"><div class="bar"><i></i><i></i><i></i><span>Colab</span><button>Copy</button></div><pre></pre></div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="spanel" data-s="7">
+    <div class="shead"><div class="num">Step 7 of 8</div><h3>Pick a model. Train it.</h3></div>
+    <div class="why"><div><b>What it is</b>Choose a model type, then <span class="mono">.fit()</span> it. Training means nudging the model’s numbers until its errors shrink.</div><div><b>Why it matters</b>This is the “learning”. Linear regression is the simplest model there is, and a great first one: it draws the best straight line through the data.</div></div>
+    <div class="lab"><h4>Try it · Be the machine</h4><div class="t">Drag the sliders to fit a line through real salaries. Then let the machine do it.</div>
+      <canvas id="cv" height="320"></canvas>
+      <div class="grid2" style="margin-top:18px;gap:24px">
+        <div><label class="fld">Slope: <b id="slv" style="color:var(--text)"></b> per extra year</label><input type="range" id="sl" min="0" max="14000" step="100" value="2000">
+             <label class="fld" style="margin-top:14px">Starting salary: <b id="inv" style="color:var(--text)"></b></label><input type="range" id="ic" min="0" max="150000" step="1000" value="30000"></div>
+        <div class="row" style="gap:12px;align-items:stretch">
+          <div class="stat" style="flex:1"><b id="errv"></b><span>Average error (MAE)</span></div>
+          <div class="stat" style="flex:1"><b id="itv">–</b><span id="itl">Training steps</span></div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:18px"><button class="pill" id="trainBtn">Train the model</button><button class="link" id="resetFit">Reset line</button><span class="small" id="trainMsg"></span></div>
+      <p class="small" style="margin-top:10px">70 real people from the file. Training = repeated small adjustments that reduce the error. Same idea inside every model.</p>
+    </div>
+    <div class="code" data-code="from sklearn.linear_model import LinearRegression
+
+model = LinearRegression()
+model.fit(X_train, y_train)"><div class="bar"><i></i><i></i><i></i><span>Colab</span><button>Copy</button></div><pre></pre></div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="spanel" data-s="8">
+    <div class="shead"><div class="num">Step 8 of 8</div><h3>Test it. Use it.</h3></div>
+    <div class="why"><div><b>What it is</b>Predict on the hidden test rows, compare with the real answers, then predict for new people.</div><div><b>Why it matters</b>This is the honest score. And it’s the moment a model becomes useful.</div></div>
+    <div class="grid2" style="margin-bottom:20px">
+      <div class="stat"><b id="maeV"></b><span>MAE · average miss in dollars</span></div>
+      <div class="stat"><b id="baseV"></b><span>MAE of a “just guess the average” model</span></div>
+    </div>
+    <p class="small" style="margin:-6px 0 20px">From one run. Yours will differ slightly, because the split is random.</p>
+    <div class="lab"><h4>Try it · Real test rows</h4><div class="t">The model had never seen these people.</div>
+      <div class="tw"><table class="d" id="evt"></table></div>
+      <div class="callout"><b>Is $22k good?</b> It cuts the average error by about half compared with guessing the average. Useful, not perfect. Salary also depends on things we never gave it, like job title and company.</div>
+    </div>
+    <div class="lab"><h4>Try it · Predict a new person</h4><div class="t">Dial in a profile.</div>
+      <div class="grid2" style="gap:30px">
+        <div>
+          <label class="fld">Age: <b id="pa" style="color:var(--text)">30</b></label><input type="range" id="age" min="21" max="62" value="30">
+          <label class="fld" style="margin-top:14px">Years of experience: <b id="pe" style="color:var(--text)">5</b></label><input type="range" id="exp" min="0" max="34" value="5">
+          <div class="grid2" style="margin-top:14px;gap:12px"><div><label class="fld">Education</label><select id="edu"><option value="0">High School</option><option value="1" selected>Bachelor’s</option><option value="2">Master’s</option><option value="3">PhD</option></select></div>
+          <div><label class="fld">Gender</label><select id="gen"><option value="F">Female</option><option value="M" selected>Male</option><option value="O">Other</option></select></div></div>
+        </div>
+        <div class="center"><div class="small">Predicted salary</div><div class="big" id="pred"></div><div class="small" id="predRange" style="margin-top:6px"></div></div>
+      </div>
+    </div>
+    <div class="code" data-code="from sklearn.metrics import mean_absolute_error
+
+preds = model.predict(X_test)
+print(&quot;MAE:&quot;, mean_absolute_error(y_test, preds))
+
+# a new person: Age, Gender, Education, Experience
+new = pd.DataFrame([[30, 1, 1, 5]], columns=X.columns)
+model.predict(new)"><div class="bar"><i></i><i></i><i></i><span>Colab</span><button>Copy</button></div><pre></pre></div>
+    <div class="center" style="margin-top:40px"><h3>That’s the whole recipe.</h3><p style="color:var(--text2);margin:8px 0 18px">Every model, from this one to the ones behind chatbots, follows these steps.</p><a class="pill" href="#classify">On to classification</a></div>
+  </div>
+
+  <div class="stepfoot"><button class="link" id="prevStep" style="transform:scaleX(1)">Back</button><span class="small"><span class="kbd">←</span> <span class="kbd">→</span> to move between steps</span><button class="pill sm" id="nextStep">Next step</button></div>
+</div></section>
+
+<!-- CLASSIFY -->
+<section class="band black" id="classify"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">05 · Classification</div><h2>Same recipe.<br>A different answer.</h2><p class="sub">Instead of a number, predict a category. Theory today. Hands-on is your homework.</p></div>
+
+  <div class="grid3 rv" style="margin-bottom:20px">
+    <div class="card" style="background:#1d1d1f"><div class="eyebrow">What stays</div><h3>All eight steps</h3><p style="color:#a1a1a6;margin-top:8px">Load. Clean. Encode. X and y. Split. Train. Test.</p></div>
+    <div class="card" style="background:#1d1d1f"><div class="eyebrow">What changes</div><h3>The model</h3><p style="color:#a1a1a6;margin-top:8px"><span class="mono">LogisticRegression</span> or a decision tree, in place of <span class="mono">LinearRegression</span>.</p></div>
+    <div class="card" style="background:#1d1d1f"><div class="eyebrow">What changes</div><h3>The score</h3><p style="color:#a1a1a6;margin-top:8px">Accuracy and a confusion matrix, in place of MAE.</p></div>
+  </div>
+
+  <div class="card rv" style="background:#1d1d1f;margin-bottom:20px">
+    <div class="eyebrow">Our homework dataset · Titanic</div>
+    <h3>Would you have survived?</h3>
+    <p style="color:#a1a1a6;margin:8px 0 22px">Pick a passenger. A real model, trained on 891 passengers, gives a probability. You choose where to draw the line.</p>
+    <div class="grid2" style="gap:36px;align-items:center">
+      <div style="color:#f5f5f7">
+        <label class="fld" style="color:#a1a1a6">Sex</label>
+        <div class="seg2" id="tSex"><button data-v="1" class="on" style="background:#2c2c2e;color:#f5f5f7;border-color:#0071e3">Female</button><button data-v="0" style="background:#2c2c2e;color:#f5f5f7;border-color:#424245">Male</button></div>
+        <label class="fld" style="margin-top:18px;color:#a1a1a6">Ticket class</label>
+        <div class="seg2" id="tCls"><button data-v="1" style="background:#2c2c2e;color:#f5f5f7;border-color:#424245">1st</button><button data-v="2" style="background:#2c2c2e;color:#f5f5f7;border-color:#424245">2nd</button><button data-v="3" class="on" style="background:#2c2c2e;color:#f5f5f7;border-color:#0071e3">3rd</button></div>
+        <label class="fld" style="margin-top:18px;color:#a1a1a6">Age: <b id="tAv" style="color:#f5f5f7">30</b></label><input type="range" id="tAge" min="1" max="80" value="30">
+      </div>
+      <div class="center">
+        <div style="color:#a1a1a6;font-size:14px">Chance of survival</div>
+        <div class="big" id="tP">–</div>
+        <div class="gauge" style="margin:24px 0 8px;background:#2c2c2e"><div class="f" id="tF"></div><div class="th" id="tTh" style="background:#f5f5f7"></div></div>
+        <div style="font-size:13px;color:#a1a1a6">Threshold: <b style="color:#f5f5f7" id="tThv">50%</b> · drag to move the line</div>
+        <input type="range" id="tThr" min="10" max="90" value="50" style="margin-top:10px">
+        <div id="tLab" style="margin-top:18px;font-size:22px;font-weight:600"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2 rv">
+    <div class="card" style="background:#1d1d1f">
+      <div class="eyebrow">Real survival rates</div><h3 style="margin-bottom:6px">Pattern in the data</h3>
+      <p style="color:#a1a1a6;font-size:15px;margin-bottom:16px">Share who survived, by sex and class. Tap a cell.</p>
+      <div class="heat" id="heat"></div>
+      <p id="heatTxt" style="color:#a1a1a6;font-size:14px;margin-top:14px;min-height:42px"></p>
+    </div>
+    <div class="card" style="background:#1d1d1f">
+      <div class="eyebrow">Scoring a classifier</div><h3 style="margin-bottom:6px">The confusion matrix</h3>
+      <p style="color:#a1a1a6;font-size:15px;margin-bottom:16px">Our model on 179 unseen passengers. Tap a cell.</p>
+      <div class="cm" id="cm" style="color:#1d1d1f"></div>
+      <p id="cmTxt" style="color:#a1a1a6;font-size:14px;margin-top:14px;min-height:42px"></p>
+    </div>
+  </div>
+
+  <div class="card rv" style="background:#1d1d1f;margin-top:20px">
+    <div class="grid2" style="gap:30px;align-items:center">
+      <div><div class="eyebrow">Accuracy, with a catch</div><h3>81% sounds great.</h3><p style="color:#a1a1a6;margin-top:10px">But 62% of passengers did not survive. A “model” that always says <i>did not survive</i> already scores 62%. Always compare with a baseline.</p></div>
+      <div class="bars" style="color:#f5f5f7">
+        <div class="bar2"><span>Always “died”</span><div class="tr" style="background:#2c2c2e"><div class="g" style="width:61.6%"></div></div><b>62%</b></div>
+        <div class="bar2"><span>Our model</span><div class="tr" style="background:#2c2c2e"><div style="width:81%"></div></div><b>81%</b></div>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+<!-- HOMEWORK -->
+<section class="band alt" id="homework"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">06 · Homework</div><h2>Your turn.</h2><p class="sub">Build a Titanic survival model yourself. Same eight steps. Tick them off as you go.</p></div>
+  <div class="card rv" style="background:#fff">
+    <div class="row" style="gap:22px;margin-bottom:22px">
+      <div class="ring"><svg width="84" height="84"><circle cx="42" cy="42" r="36" fill="none" stroke="#e8e8ed" stroke-width="7"/><circle id="ringC" cx="42" cy="42" r="36" fill="none" stroke="#0071e3" stroke-width="7" stroke-linecap="round" stroke-dasharray="226.2" stroke-dashoffset="226.2" style="transition:stroke-dashoffset .5s"/></svg><span id="ringT">0/8</span></div>
+      <div><h3>Titanic.csv · predict <span class="mono">Survived</span></h3><p style="color:var(--text2);margin-top:4px">Progress is saved in this browser.</p></div>
+    </div>
+    <div class="hw" id="hw"></div>
+    <details><summary>Stuck? Functions to look up</summary><ul>
+      <li><span class="mono">pd.read_csv</span>, <span class="mono">df[[...]]</span> to keep columns</li>
+      <li><span class="mono">df[&quot;Age&quot;].fillna(df[&quot;Age&quot;].median())</span> to fill gaps</li>
+      <li><span class="mono">df[&quot;Sex&quot;].map({...})</span> to encode</li>
+      <li><span class="mono">train_test_split</span>, <span class="mono">LogisticRegression</span></li>
+      <li><span class="mono">accuracy_score</span>, <span class="mono">confusion_matrix</span> from <span class="mono">sklearn.metrics</span></li></ul></details>
+    <details><summary>Stretch goals</summary><ul>
+      <li>Add <span class="mono">Fare</span> and <span class="mono">SibSp</span> as features. Does accuracy improve?</li>
+      <li>Add <span class="mono">Embarked</span>. It’s text too, so encode it the way you encoded Sex.</li>
+      <li>Swap in <span class="mono">DecisionTreeClassifier</span>. Which model wins?</li>
+      <li>Beat 81%. Then ask: is it honest, or lucky with this split?</li></ul></details>
+  </div>
+</div></section>
+
+<!-- RECAP -->
+<section class="band" id="recap"><div class="wrap">
+  <div class="head rv"><div class="eyebrow">07 · Recap</div><h2>The cheat sheet.</h2><p class="sub">Tap a card to flip it to the code.</p></div>
+  <div class="flips" id="flips"></div>
+
+  <div class="head" style="margin-top:100px"><h2 style="font-size:clamp(28px,4vw,40px)">Quick check.</h2></div>
+  <div class="card quiz" id="quiz"></div>
+</div></section>
+
+<footer>Built for a live, hands-on session. Dataset credits: Kaggle salary data and the Titanic passenger list.</footer>
+
+<script>
+const DATA = {"scatter": [[2.0, 70000], [2.0, 36000], [2.0, 110000], [11.0, 198000], [14.0, 190000], [0.0, 52612], [4.0, 140000], [17.0, 195000], [14.0, 119224], [4.0, 70000], [15.0, 150000], [18.0, 180000], [2.0, 48000], [1.0, 47898], [4.0, 70000], [17.0, 195000], [30.0, 183138], [4.0, 73895], [4.0, 80000], [1.0, 55000], [12.0, 160000], [10.0, 150000], [8.0, 190000], [8.0, 190000], [5.0, 105000], [5.0, 145000], [5.0, 150000], [3.0, 80000], [8.0, 80000], [9.0, 132638], [4.0, 55000], [7.0, 75000], [5.0, 100000], [1.0, 40000], [5.0, 160000], [7.0, 120000], [14.0, 140000], [2.0, 40000], [19.0, 200000], [7.0, 135000], [3.0, 80000], [4.0, 140000], [1.0, 50000], [6.0, 75000], [18.0, 182000], [8.0, 92000], [20.0, 143084], [3.0, 130000], [3.0, 49000], [15.0, 150000], [14.0, 190000], [1.0, 35000], [1.0, 50000], [2.0, 40000], [10.0, 110000], [7.0, 135000], [3.0, 120000], [3.0, 135000], [29.0, 194778], [1.0, 90000], [2.0, 31000], [19.0, 185000], [3.0, 130000], [3.0, 80000], [6.0, 77000], [23.0, 188288], [1.5, 45000], [8.0, 121454], [2.0, 62807], [29.0, 194778]], "messy": [[32, "Male", "Bachelor's", "Software Engineer", 5, 90000], [28, "Female", "Master's", "Data Analyst", 3, 65000], [45, "Male", "PhD", "Senior Manager", 15, 150000], [27, "Male", null, "Developer", 7, 100000], [27, "Female", "Master's Degree", "Data Scientist", 3, 180000], [31, "Male", "Master's Degree", "Full Stack Engineer", 8, null], [27, "Male", "phD", "Marketing Coordinator", 7, 120000], [36, "Female", "Bachelor's", "Sales Associate", 7, 60000]], "coef": {"Age": -2182, "Gender": 5989, "Education Level": 15688, "Years of Experience": 8202}, "intercept": 93747, "evalrows": [[31, 9, 185000, 137285], [31, 8, 120000, 123094], [32, 8, 80000, 105224], [45, 18, 180000, 196242], [29, 4, 70000, 84951], [29, 5, 80000, 93153], [32, 8, 190000, 111213], [26, 3, 130000, 77306]], "one": [7047, 58285], "tit": {"coef": [2.474, -1.036, -0.026], "b": 1.636, "acc": 0.81, "cm": [[91, 14], [20, 54]], "base": 0.616}, "mae": 22477, "r2": 0.708, "base_mae": 46310, "n": 6698};
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const money = n => "$" + Math.round(n).toLocaleString("en-US");
+const store = {
+  get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } },
+  set(k,v){ try { localStorage.setItem(k,v); } catch(e){} }
+};
+
+/* ---------- chrome ---------- */
+const STEPS = [
+  ["Define","Frame the problem","# predict Salary (number)"],
+  ["Load","Read the data in","df = pd.read_csv(\"Salary_Data.csv\")"],
+  ["Clean","Fix gaps and typos","df = df.dropna()"],
+  ["Encode","Words to numbers","df[\"Gender\"].map(\n  {\"Female\": 0, ...})"],
+  ["X and y","Clues vs answer","X = df.drop(columns=\"Salary\")\ny = df[\"Salary\"]"],
+  ["Split","Hide an exam","train_test_split(X, y,\n  test_size=0.2)"],
+  ["Train","Fit the model","model.fit(X_train, y_train)"],
+  ["Test","Score, then use","model.predict(X_test)"]
+];
+$("#heroSteps").innerHTML = STEPS.map((s,i)=>`<span style="animation-delay:${.15*i+.2}s">${i+1}</span>`).join("");
+
+function onScroll(){
+  const h = document.documentElement;
+  $("#bar").style.width = (h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+"%";
+}
+addEventListener("scroll", onScroll, {passive:true});
+const navLinks = $$("nav.top a");
+const secs = navLinks.map(a=>$(a.getAttribute("href")));
+const navObs = new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) navLinks.forEach(a=>a.classList.toggle("on", a.getAttribute("href")==="#"+e.target.id));
+}),{rootMargin:"-45% 0px -50% 0px"});
+secs.forEach(s=>navObs.observe(s));
+const rvo = new IntersectionObserver(es=>es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add("in"); rvo.unobserve(e.target);} }),{threshold:.08});
+$$(".rv").forEach(el=>rvo.observe(el));
+$("#presentBtn").onclick = e => {
+  const on = document.documentElement.classList.toggle("present");
+  e.currentTarget.setAttribute("aria-pressed", on);
+  setTimeout(()=>{ drawFit(); },50);
+};
+
+/* ---------- code blocks ---------- */
+function hl(src){
+  const esc = src.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  return esc.split("\n").map(line=>{
+    if(/^\s*#/.test(line)) return `<span class="c">${line}</span>`;
+    let l = line.replace(/(&quot;[^&]*?&quot;|"[^"]*"|'[^']*')/g,"\u0001$1\u0002");
+    l = l.replace(/\b(import|from|as|print)\b/g,"\u0003$1\u0004");
+    l = l.replace(/\u0001/g,'<span class="s">').replace(/\u0002/g,"</span>").replace(/\u0003/g,'<span class="k">').replace(/\u0004/g,"</span>");
+    return l;
+  }).join("\n");
+}
+function setCode(box, src){
+  box.dataset.raw = src;
+  $("pre", box).innerHTML = hl(src.replace(/&quot;/g,'"'));
+}
+$$(".code").forEach(b=>{ if(b.dataset.code!==undefined) setCode(b, b.dataset.code.replace(/&quot;/g,'"')); });
+document.addEventListener("click", e=>{
+  const btn = e.target.closest(".code .bar button"); if(!btn) return;
+  const box = btn.closest(".code"); const text = box.dataset.raw;
+  const done = ()=>{ btn.textContent="Copied"; setTimeout(()=>btn.textContent="Copy",1400); };
+  if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(done,()=>{}); }
+  else { const t=document.createElement("textarea"); t.value=text; document.body.appendChild(t); t.select(); try{document.execCommand("copy");done();}catch(_){} t.remove(); }
+});
+
+/* ---------- 01 paradigm ---------- */
+const flowDef = {
+  old:{ boxes:[["Data","Rows to process"],["Rules","You write them by hand"],["Answers","Come out"]], mid:1, txt:"You think of the rules and code them. The computer applies them to data and produces answers. Works until the rules get too many to write." },
+  ml:{ boxes:[["Data","Rows to learn from"],["Answers","Known outcomes"],["Rules","The machine finds them"]], mid:2, txt:"You give the machine data with the answers already known. It works out the rules itself, then applies them to new data." }
+};
+function renderFlow(m){
+  const d = flowDef[m];
+  $("#flow").innerHTML = d.boxes.map((b,i)=>`<div class="box ${i===d.mid?"mid":(i===0||i===1&&m==="ml"?"you":"")}"><b>${b[0]}</b><span>${b[1]}</span></div>${i<2?'<div class="arr">'+(i===0?"+":"→")+"</div>":""}`).join("");
+  $("#flowTxt").textContent = d.txt;
+}
+renderFlow("old");
+$$("#paradigm button").forEach(b=>b.onclick=()=>{ $$("#paradigm button").forEach(x=>x.classList.toggle("on",x===b)); renderFlow(b.dataset.m); });
+
+/* guess game */
+const ONE = DATA.one || [7047,58285];
+$("#guess").oninput = e => $("#gv").textContent = money(e.target.value);
+$("#gbtn").onclick = () => {
+  const g = +$("#guess").value, m = ONE[0]*8+ONE[1], diff = Math.abs(g-m);
+  $("#gout").innerHTML = `A model fitted to <b>6,698 real people</b> says <b>${money(m)}</b>.<br>You were ${diff<10000?"within <b>"+money(diff)+"</b>. Nicely done.":"off by <b>"+money(diff)+"</b>."}<br><span class="small">You just did machine learning: spotted a pattern in examples, applied it to a new case.</span>`;
+};
+
+/* ---------- 02 tiles ---------- */
+const TILES = [
+  ["🗺️","Arrival time","Maps predicts how long your trip will take.","num","Predicts: minutes (a number). From: distance, traffic, time of day, past trips."],
+  ["✉️","Spam filter","Your inbox decides what is junk.","cat","Predicts: spam or not (a category). From: words, sender, links."],
+  ["🏠","House prices","Listing sites estimate what a home is worth.","num","Predicts: price (a number). From: area, rooms, location, age of home."],
+  ["💳","Fraud alerts","Your bank flags an odd transaction.","cat","Predicts: fraud or genuine. From: amount, place, time, your usual habits."],
+  ["🎬","Recommendations","Streaming picks what you’ll watch next.","cat","Predicts: will you like it, yes or no. From: what you and people like you watched."],
+  ["📦","Demand forecasts","Retailers plan how much stock to order.","num","Predicts: units next week (a number). From: past sales, season, promotions."],
+  ["👥","Staff attrition","HR spots who may leave the company.","cat","Predicts: stays or leaves. From: tenure, pay, role, engagement."],
+  ["🔓","Face unlock","Your phone knows it’s you.","cat","Predicts: the owner or not. From: pixels of the face image."]
+];
+$("#tiles").innerHTML = TILES.map((t,i)=>`<button class="tile" data-k="${t[3]}" aria-expanded="false"><div class="ic">${t[0]}</div><h3>${t[1]}</h3><p>${t[2]}</p><div class="go">See what it predicts</div><div class="more"><span class="tag ${t[3]==="num"?"blue":"green"}">${t[3]==="num"?"Regression":"Classification"}</span><br><span style="display:block;margin-top:8px">${t[4]}</span></div></button>`).join("");
+$$(".tile").forEach(t=>t.onclick=()=>{ const o=t.classList.toggle("open"); t.setAttribute("aria-expanded",o); });
+$$("#tileChips .chip").forEach(c=>c.onclick=()=>{
+  $$("#tileChips .chip").forEach(x=>x.classList.toggle("on",x===c));
+  $$(".tile").forEach(t=>t.classList.toggle("hide", c.dataset.f!=="all" && t.dataset.k!==c.dataset.f));
+});
+
+/* ---------- 03 tabs + game ---------- */
+const NC = [
+  ["Predict the price of a flat","num","A price is a number."],
+  ["Is this email spam?","cat","Two buckets: spam or not."],
+  ["How many units will we sell next week?","num","A count is a number."],
+  ["Will this customer leave us?","cat","Stays or leaves. A category."],
+  ["How many minutes will a delivery take?","num","Minutes, a number."],
+  ["Is this card transaction fraud?","cat","Fraud or genuine."],
+  ["Which team should this support ticket go to?","cat","Pick one of several teams. Still a category."],
+  ["What will tomorrow’s temperature be?","num","Degrees, a number."]
+];
+let ncI=0, ncScore=0, ncRes=[];
+function ncRender(){
+  $("#ncDots").innerHTML = NC.map((_,i)=>`<i class="${ncRes[i]===1?"ok":ncRes[i]===0?"no":i===ncI?"cur":""}"></i>`).join("");
+  if(ncI>=NC.length){
+    $("#ncQ").textContent = `${ncScore} out of ${NC.length}`;
+    $$("#nc .opts button").forEach(b=>b.style.display="none");
+    $("#ncFb").textContent = ncScore>=7?"You can tell regression from classification. That’s half the battle.":"Rule of thumb: could the answer be 3.7? Then it’s a number.";
+    $("#ncNext").textContent="Play again"; $("#ncNext").style.display="inline-block"; return;
+  }
+  $("#ncQ").textContent = NC[ncI][0]; $("#ncFb").textContent="";
+  $$("#nc .opts button").forEach(b=>{ b.disabled=false; b.className=""; b.style.display=""; });
+  $("#ncNext").style.display="none";
+}
+$$("#nc .opts button").forEach(b=>b.onclick=()=>{
+  const ok = b.dataset.a===NC[ncI][1];
+  ncRes[ncI]=ok?1:0; if(ok) ncScore++;
+  $$("#nc .opts button").forEach(x=>{ x.disabled=true; if(x.dataset.a===NC[ncI][1]) x.classList.add("right"); });
+  if(!ok) b.classList.add("wrong");
+  $("#ncFb").textContent = (ok?"Yes. ":"Not quite. ")+NC[ncI][2];
+  $("#ncDots").innerHTML = NC.map((_,i)=>`<i class="${ncRes[i]===1?"ok":ncRes[i]===0?"no":i===ncI?"cur":""}"></i>`).join("");
+  $("#ncNext").textContent = ncI===NC.length-1?"See score":"Next"; $("#ncNext").style.display="inline-block";
+});
+$("#ncNext").onclick = ()=>{ if(ncI>=NC.length){ ncI=0; ncScore=0; ncRes=[]; } else ncI++; ncRender(); };
+ncRender();
+
+/* ---------- 04 stepper ---------- */
+let cur = 1; const done = new Set();
+$("#stepnav").innerHTML = STEPS.map((s,i)=>`<button class="sbtn" data-i="${i+1}"><i>${i+1}</i>${s[0]}</button>`).join("");
+function goStep(n){
+  cur = Math.max(1,Math.min(8,n));
+  for(let i=1;i<cur;i++) done.add(i);
+  $$(".spanel").forEach(p=>p.classList.toggle("on", +p.dataset.s===cur));
+  $$(".sbtn").forEach(b=>{ const i=+b.dataset.i; b.classList.toggle("on",i===cur); b.classList.toggle("done",done.has(i)&&i!==cur||done.has(i)); });
+  $("#sprog").style.width = (cur/8*100)+"%";
+  $("#prevStep").style.visibility = cur===1?"hidden":"visible";
+  $("#nextStep").style.visibility = cur===8?"hidden":"visible";
+  $("#nextStep").textContent = "Step "+(cur+1)+": "+(STEPS[cur]?STEPS[cur][0]:"");
+  if(cur===7) setTimeout(drawFit,30);
+}
+$$(".sbtn").forEach(b=>b.onclick=()=>goStep(+b.dataset.i));
+$("#prevStep").onclick=()=>goStep(cur-1);
+$("#nextStep").onclick=()=>{ goStep(cur+1); $("#stepnav").scrollIntoView({behavior:"smooth",block:"center"}); };
+addEventListener("keydown",e=>{
+  if(e.target.matches("input,select,textarea")) return;
+  const r=$("#build").getBoundingClientRect();
+  if(r.top<innerHeight*.6 && r.bottom>innerHeight*.3){
+    if(e.key==="ArrowRight"){ goStep(cur+1); e.preventDefault(); }
+    if(e.key==="ArrowLeft"){ goStep(cur-1); e.preventDefault(); }
+  }
+});
+
+/* step 1 */
+const COLS = [
+  ["Age","number"],["Gender","text"],["Education Level","text"],["Job Title","text"],["Years of Experience","number"],["Salary","number"]
+];
+const S1MSG = {
+  "Salary":["tag green","Great pick.","Salary is a number, so this is <b>regression</b>. The other columns become clues."],
+  "Age":["tag orange","Possible.","Age is a number, so that would be regression. But salary is the question people actually care about."],
+  "Years of Experience":["tag orange","Possible.","It’s a number, so regression works. But we’d rather use it as a clue to predict pay."],
+  "Gender":["tag red","That would be classification.","Gender is a category. Predicting it from salary is rarely a useful question."],
+  "Education Level":["tag red","That would be classification.","A category with a handful of values. Possible, but not today’s goal."],
+  "Job Title":["tag red","That would be classification.","A category with hundreds of values. Hard, and not today’s goal."]
+};
+$("#s1chips").innerHTML = COLS.map(c=>`<button class="cc" data-c="${c[0]}"><b>${c[0]}</b><span>${c[1]}</span></button>`).join("");
+$$("#s1chips .cc").forEach(b=>b.onclick=()=>{
+  $$("#s1chips .cc").forEach(x=>x.classList.toggle("sel",x===b));
+  const m = S1MSG[b.dataset.c];
+  $("#s1v").innerHTML = `<span class="${m[0]}">${m[1]}</span> <span style="margin-left:6px">${m[2]}</span>`;
+});
+
+/* step 2 */
+const HEAD = [["Age","Gender","Education Level","Job Title","Years of Experience","Salary"],
+ [32,"Male","Bachelor's","Software Engineer",5,90000],[28,"Female","Master's","Data Analyst",3,65000],[45,"Male","PhD","Senior Manager",15,150000],[36,"Female","Bachelor's","Sales Associate",7,60000],[52,"Male","Master's","Director",20,200000]];
+const S2 = {
+  head:()=>`<div class="tw"><table class="d"><tr><th></th>${HEAD[0].map(h=>`<th>${h}</th>`).join("")}</tr>${HEAD.slice(1).map((r,i)=>`<tr><td class="idx">${i}</td>${r.map((v,j)=>`<td>${j===5?v.toLocaleString("en-US"):v}</td>`).join("")}</tr>`).join("")}</table></div>`,
+  shape:()=>`<div class="out">(6704, 6)\n# 6,704 rows, 6 columns</div>`,
+  info:()=>`<div class="out">Column               Non-Null Count  Dtype
+Age                  6702 non-null   float64
+Gender               6702 non-null   object
+Education Level      6701 non-null   object
+Job Title            6702 non-null   object
+Years of Experience  6701 non-null   float64
+Salary               6699 non-null   float64
+# 6,704 rows, but some columns have fewer. Those are the gaps.</div>`
+};
+$("#s2out").innerHTML = S2.head();
+$$("[data-cmd]").forEach(b=>b.onclick=()=>{ $("#s2out").innerHTML = S2[b.dataset.cmd](); });
+
+/* step 3 */
+const fx = {title:false, na:false, edu:false};
+const FIXN = {title:0, na:-6, edu:0};
+function s3(){
+  const hdrs = ["Age","Gender","Education Level","Job Title","Years of Experience","Salary"];
+  const keep = hdrs.map((h,i)=>!(fx.title && i===3));
+  let html = `<tr>${hdrs.map((h,i)=>keep[i]?`<th>${h}</th>`:"").join("")}</tr>`;
+  let probs = 0;
+  DATA.messy.forEach(r=>{
+    const hasNull = r.some((v,i)=>keep[i] && v===null);
+    if(fx.na && hasNull) return;
+    html += "<tr>"+r.map((v,i)=>{
+      if(!keep[i]) return "";
+      if(v===null){ probs++; return `<td class="nul">blank</td>`; }
+      if(i===2 && (/Degree$/.test(v) || v==="phD")){
+        if(fx.edu){ const nv = v==="phD"?"PhD":v.replace(" Degree",""); return `<td class="ok">${nv}</td>`; }
+        probs++; return `<td class="bad">${v}</td>`;
+      }
+      return `<td>${i===5?v.toLocaleString("en-US"):v}</td>`;
+    }).join("")+"</tr>";
+  });
+  $("#s3t").innerHTML = html;
+  $("#s3c").textContent = probs===0?"No problems left in these rows. ✓":`${probs} problem cell${probs>1?"s":""} left in these rows`;
+  const total = 6704 + (fx.na?-6:0);
+  $("#s3n").textContent = total.toLocaleString("en-US");
+  $$("#s3btns [data-fix]").forEach(b=>{ b.classList.toggle("ghost",!fx[b.dataset.fix]); });
+}
+$$("#s3btns [data-fix]").forEach(b=>b.onclick=()=>{ fx[b.dataset.fix]=!fx[b.dataset.fix]; s3(); });
+$("#s3reset").onclick=()=>{ fx.title=fx.na=fx.edu=false; s3(); };
+s3();
+
+/* step 4 */
+const ENC = [
+  ["Education Level", [["High School",0],["Bachelor's",1],["Master's",2],["PhD",3]]],
+  ["Gender", [["Female",0],["Male",1],["Other",2]]]
+];
+$("#encOut").innerHTML = ENC.map((e,k)=>`<div class="tw"><table class="d" data-k="${k}"><tr><th>${e[0]}</th><th>becomes</th></tr>${e[1].map(r=>`<tr data-v="${r[1]}" style="cursor:pointer"><td>${r[0]}</td><td class="num"><span class="idx">tap</span></td></tr>`).join("")}</table></div>`).join("");
+$$("#encOut tr[data-v]").forEach(tr=>tr.onclick=()=>{
+  const c=$(".num",tr); const on=c.dataset.on==="1";
+  c.dataset.on=on?"0":"1"; c.innerHTML = on?`<span class="idx">tap</span>`:`<b>${tr.dataset.v}</b>`; c.className = on?"num":"num ok";
+});
+
+/* step 5 */
+const S5COLS = [["Age","clue"],["Gender","clue"],["Education Level","clue"],["Years of Experience","clue"],["Salary","answer"]];
+const s5state = {};
+$("#s5chips").innerHTML = S5COLS.map(c=>`<button class="cc" data-c="${c[0]}"><b>${c[0]}</b><span>tap to label</span></button>`).join("");
+$$("#s5chips .cc").forEach(b=>b.onclick=()=>{
+  const c=b.dataset.c; const order=[undefined,"X","y"]; const n=order[(order.indexOf(s5state[c])+1)%3];
+  s5state[c]=n; b.classList.remove("X","y"); if(n) b.classList.add(n);
+  $("span",b).textContent = n==="X"?"X · clue":n==="y"?"y · answer":"tap to label"; $("#s5v").textContent="";
+});
+$("#s5check").onclick=()=>{
+  const wrong = S5COLS.filter(c=>s5state[c[0]]!==(c[1]==="clue"?"X":"y"));
+  $("#s5v").innerHTML = wrong.length===0?`<span class="tag green">Correct.</span> Salary is y. Everything else is X.`:wrong.some(c=>!s5state[c[0]])?`<span class="tag orange">Label every column first.</span>`:`<span class="tag red">Not yet.</span> The answer we want to predict is y. The rest are clues.`;
+};
+
+/* step 6 */
+const NROWS = DATA.n;
+function split(){
+  const p = +$("#split").value;
+  const te = Math.ceil(NROWS*p/100), tr = NROWS-te;
+  $("#splitv").textContent = p+"%"; $("#ntr").textContent = tr.toLocaleString("en-US"); $("#nte").textContent = te.toLocaleString("en-US");
+  const dg = $("#dgrid"); if(!dg.children.length) dg.innerHTML = "<i></i>".repeat(100);
+  const nt = Math.round(p); const cells = [...dg.children];
+  // fixed pseudo-shuffle so test dots look scattered
+  const order = cells.map((_,i)=>i).sort((a,b)=>((a*37+11)%101)-((b*37+11)%101));
+  cells.forEach(c=>c.classList.remove("t")); order.slice(0,nt).forEach(i=>cells[i].classList.add("t"));
+  setCode($("#s6code"), `from sklearn.model_selection import train_test_split
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=${(p/100).toFixed(2).replace(/0$/,"")})
+
+print(X_train.shape, X_test.shape)`);
+}
+$("#split").oninput = split; split();
+const STUD = { a:{name:"Understood it",pr:85,ex:82,t:"Similar score on practice and the real exam. It learned the idea."}, b:{name:"Memorised it",pr:100,ex:41,t:"Perfect on the practice paper, poor on new questions. This is called overfitting, and it’s why we keep a test set."} };
+function stud(k){
+  const s=STUD[k]; $$("#stud button").forEach(b=>b.classList.toggle("on",b.dataset.st===k));
+  $("#studBars").innerHTML = `<div class="bar2"><span>Practice paper</span><div class="tr"><div style="width:0" data-w="${s.pr}"></div></div><b>${s.pr}%</b></div><div class="bar2"><span>New exam</span><div class="tr"><div class="g" style="width:0" data-w="${s.ex}"></div></div><b>${s.ex}%</b></div>`;
+  $("#studTxt").textContent = s.t;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$$("#studBars [data-w]").forEach(d=>d.style.width=d.dataset.w+"%")));
+}
+$$("#stud button").forEach(b=>b.onclick=()=>stud(b.dataset.st)); stud("a");
+
+/* step 7 : fit playground */
+const PTS = DATA.scatter, XM=35, YM=260000;
+const cv = $("#cv"), ctx = cv.getContext("2d");
+let line = {a:2000,b:30000}, anim = null;
+const mae = (a,b) => PTS.reduce((s,p)=>s+Math.abs(p[1]-(a*p[0]+b)),0)/PTS.length;
+function drawFit(){
+  const dpr = devicePixelRatio||1, w = cv.clientWidth, h = 320;
+  if(!w) return;
+  cv.width = w*dpr; cv.height = h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+  const L=58,B=34,T=14,R=14, pw=w-L-R, ph=h-T-B;
+  const X = x=>L+x/XM*pw, Y = y=>T+ph-y/YM*ph;
+  ctx.clearRect(0,0,w,h); ctx.font="12px -apple-system,Helvetica,Arial"; ctx.fillStyle="#6e6e73"; ctx.strokeStyle="#ececf0"; ctx.lineWidth=1;
+  for(let y=0;y<=250000;y+=50000){ ctx.beginPath(); ctx.moveTo(L,Y(y)); ctx.lineTo(w-R,Y(y)); ctx.stroke(); ctx.textAlign="right"; ctx.fillText("$"+(y/1000)+"k",L-8,Y(y)+4); }
+  ctx.textAlign="center"; for(let x=0;x<=30;x+=5) ctx.fillText(x,X(x),h-14);
+  ctx.fillText("Years of experience",L+pw/2,h-1);
+  // error ticks
+  ctx.strokeStyle="rgba(215,0,21,.25)";
+  PTS.forEach(p=>{ ctx.beginPath(); ctx.moveTo(X(p[0]),Y(p[1])); ctx.lineTo(X(p[0]),Y(line.a*p[0]+line.b)); ctx.stroke(); });
+  ctx.fillStyle="rgba(0,113,227,.55)";
+  PTS.forEach(p=>{ ctx.beginPath(); ctx.arc(X(p[0]),Y(p[1]),4.5,0,7); ctx.fill(); });
+  ctx.strokeStyle="#1d1d1f"; ctx.lineWidth=3; ctx.lineCap="round"; ctx.beginPath(); ctx.moveTo(X(0),Y(line.b)); ctx.lineTo(X(XM),Y(line.a*XM+line.b)); ctx.stroke();
+  $("#slv").textContent = money(line.a); $("#inv").textContent = money(line.b);
+  $("#errv").textContent = money(mae(line.a,line.b));
+  $("#sl").value = Math.min(14000,Math.max(0,line.a)); $("#ic").value = Math.min(150000,Math.max(0,line.b));
+}
+addEventListener("resize",drawFit);
+function stopAnim(){ if(anim){ cancelAnimationFrame(anim); anim=null; } $("#trainBtn").textContent="Train the model"; }
+$("#sl").oninput=e=>{ stopAnim(); line.a=+e.target.value; $("#itv").textContent="–"; drawFit(); };
+$("#ic").oninput=e=>{ stopAnim(); line.b=+e.target.value; $("#itv").textContent="–"; drawFit(); };
+$("#resetFit").onclick=()=>{ stopAnim(); line={a:2000,b:30000}; $("#itv").textContent="–"; $("#trainMsg").textContent=""; drawFit(); };
+$("#trainBtn").onclick=()=>{
+  if(anim){ stopAnim(); return; }
+  line={a:0,b:20000}; let it=0; $("#trainMsg").textContent=""; $("#trainBtn").textContent="Stop";
+  let w=0,b=20000/YM; const xs=PTS.map(p=>p[0]/30), ys=PTS.map(p=>p[1]/YM);
+  const lr=0.35, MAXIT=400;
+  (function step(){
+    for(let k=0;k<4;k++){
+      let gw=0,gb=0; for(let i=0;i<xs.length;i++){ const e=(w*xs[i]+b)-ys[i]; gw+=e*xs[i]; gb+=e; }
+      w-=lr*gw*2/xs.length; b-=lr*gb*2/xs.length; it++;
+    }
+    line = {a:w*YM/30, b:b*YM};
+    $("#itv").textContent = it; $("#itl").textContent="Training steps";
+    drawFit();
+    if(it<MAXIT){ anim=requestAnimationFrame(step); }
+    else { anim=null; $("#trainBtn").textContent="Train again"; $("#trainMsg").textContent=`Done. Average error: ${money(mae(line.a,line.b))}. Could you beat it by hand?`; }
+  })();
+};
+drawFit();
+
+/* equation + coefficient bars */
+const C = DATA.coef, IC = DATA.intercept;
+
+
+$("#maeV").textContent = money(DATA.mae); $("#baseV").textContent = money(DATA.base_mae);
+$("#evt").innerHTML = `<tr><th>Age</th><th>Experience</th><th>Actual salary</th><th>Predicted</th><th>Miss</th></tr>` + DATA.evalrows.map(r=>{ const d=r[3]-r[2]; return `<tr><td>${r[0]}</td><td>${r[1]} yrs</td><td>${money(r[2])}</td><td>${money(r[3])}</td><td style="color:${Math.abs(d)<15000?"var(--green)":Math.abs(d)<40000?"var(--orange)":"var(--red)"}">${d>0?"+":"−"}${money(Math.abs(d))}</td></tr>`; }).join("");
+function pred(){
+  const age=+$("#age").value, exp=+$("#exp").value, edu=+$("#edu").value, g=$("#gen").value;
+  $("#pa").textContent=age; $("#pe").textContent=exp;
+  const parts = [["Base",IC],["Experience",C["Years of Experience"]*exp],["Education",C["Education Level"]*edu],["Age",C["Age"]*age],["Gender",C["Gender"]*(g==="M"?1:g==="O"?2:0)]];
+  const total = Math.max(0,parts.reduce((s,p)=>s+p[1],0));
+  $("#pred").textContent = money(total);
+  $("#predRange").textContent = `Typically within about ±${money(DATA.mae)}`;
+
+}
+["age","exp","edu","gen"].forEach(i=>$("#"+i).oninput=pred); $("#edu").onchange=pred; $("#gen").onchange=pred; pred();
+goStep(1);
+
+/* ---------- 05 classification ---------- */
+const T = DATA.tit; const tS={sex:1,cls:3};
+function tit(){
+  const age=+$("#tAge").value; $("#tAv").textContent=age;
+  const z = T.b + T.coef[0]*tS.sex + T.coef[1]*tS.cls + T.coef[2]*age;
+  const p = 1/(1+Math.exp(-z)), th=+$("#tThr").value/100;
+  $("#tP").textContent = Math.round(p*100)+"%"; $("#tF").style.width = p*100+"%"; $("#tTh").style.left = `calc(${th*100}% - 1px)`;
+  $("#tThv").textContent = Math.round(th*100)+"%";
+  $("#tLab").innerHTML = p>=th?`<span style="color:#30d158">Predicted: survived</span>`:`<span style="color:#ff6961">Predicted: did not survive</span>`;
+}
+function tseg(id,key){ $$("#"+id+" button").forEach(b=>b.onclick=()=>{ tS[key]=+b.dataset.v; $$("#"+id+" button").forEach(x=>{ const on=x===b; x.classList.toggle("on",on); x.style.borderColor = on?"#0071e3":"#424245"; }); tit(); }); }
+tseg("tSex","sex"); tseg("tCls","cls"); $("#tAge").oninput=tit; $("#tThr").oninput=tit; tit();
+
+const HEATD = {female:{1:[.97,94],2:[.92,76],3:[.50,144]}, male:{1:[.37,122],2:[.16,108],3:[.14,347]}};
+function heatCol(v){ const a=.12+v*.88; return `rgba(41,151,255,${a})`; }
+let hh = `<div></div><div style="color:#a1a1a6">1st class</div><div style="color:#a1a1a6">2nd class</div><div style="color:#a1a1a6">3rd class</div>`;
+["female","male"].forEach(s=>{ hh += `<div style="color:#a1a1a6;text-align:right;padding-right:6px">${s==="female"?"Women":"Men"}</div>`+[1,2,3].map(c=>`<div class="c" data-s="${s}" data-c="${c}" style="background:${heatCol(HEATD[s][c][0])};color:${HEATD[s][c][0]>.5?"#000":"#f5f5f7"}">${Math.round(HEATD[s][c][0]*100)}%<small>of ${HEATD[s][c][1]}</small></div>`).join(""); });
+$("#heat").innerHTML = hh;
+$("#heatTxt").textContent = "Women in 1st class: 97% survived. Men in 3rd: 14%. A model simply learns patterns like this.";
+$$("#heat .c").forEach(c=>c.onclick=()=>{ $$("#heat .c").forEach(x=>x.classList.toggle("on",x===c)); const d=HEATD[c.dataset.s][c.dataset.c]; $("#heatTxt").textContent=`${c.dataset.s==="female"?"Women":"Men"} in class ${c.dataset.c}: ${Math.round(d[0]*100)}% survived, out of ${d[1]} passengers in the training file.`; });
+
+const CM = T.cm; // [[TN,FP],[FN,TP]]
+const CMX = [["True negative","Said “died”. Actually died. Correct."],["False positive","Said “survived”. Actually died. A wrong alarm."],["False negative","Said “died”. Actually survived. A miss."],["True positive","Said “survived”. Actually survived. Correct."]];
+$("#cm").innerHTML = `<div></div><div class="h">Predicted: died</div><div class="h">Predicted: survived</div>
+ <div class="h">Actually died</div><div class="cell good" data-i="0"><b>${CM[0][0]}</b></div><div class="cell bad" data-i="1"><b>${CM[0][1]}</b></div>
+ <div class="h">Actually survived</div><div class="cell bad" data-i="2"><b>${CM[1][0]}</b></div><div class="cell good" data-i="3"><b>${CM[1][1]}</b></div>`;
+$("#cmTxt").textContent = `Accuracy = correct ÷ total = (${CM[0][0]} + ${CM[1][1]}) ÷ 179 = ${Math.round(T.acc*100)}%.`;
+$$("#cm .cell").forEach(c=>c.onclick=()=>{ const i=+c.dataset.i; const n=[CM[0][0],CM[0][1],CM[1][0],CM[1][1]][i]; $("#cmTxt").innerHTML=`<b style="color:#f5f5f7">${CMX[i][0]} · ${n}.</b> ${CMX[i][1]}`; });
+
+/* ---------- 06 homework ---------- */
+const HW = [
+  ["Load Titanic.csv","Upload it to Colab and look at head() and shape."],
+  ["Keep four columns","Survived, Sex, Pclass, Age. Drop the rest."],
+  ["Clean it","Age has gaps. Fill them with the median."],
+  ["Encode Sex","Turn male and female into 0 and 1."],
+  ["Split X and y","y is Survived. X is the other three."],
+  ["Train and test split","80/20."],
+  ["Train the model","LogisticRegression. Fit it on the training rows."],
+  ["Score it","Accuracy and the confusion matrix. Beat the 62% baseline."]
+];
+const saved = (()=>{ try{ return JSON.parse(store.get("mlhw")||"[]"); }catch(e){ return []; } })();
+$("#hw").innerHTML = HW.map((h,i)=>`<label class="${saved[i]?"done":""}"><input type="checkbox" data-i="${i}" ${saved[i]?"checked":""}><span class="tx"><b>${i+1}. ${h[0]}</b>${h[1]}</span></label>`).join("");
+function ring(){
+  const n = $$("#hw input:checked").length;
+  $("#ringT").textContent = n+"/8"; $("#ringC").style.strokeDashoffset = 226.2*(1-n/8);
+}
+$$("#hw input").forEach(c=>c.onchange=()=>{
+  c.closest("label").classList.toggle("done",c.checked);
+  store.set("mlhw", JSON.stringify($$("#hw input").map(x=>x.checked))); ring();
+});
+ring();
+
+/* ---------- 07 recap ---------- */
+$("#flips").innerHTML = STEPS.map((s,i)=>`<button class="flip" aria-label="Step ${i+1}: ${s[0]}"><div class="in"><div class="f"><b>Step ${i+1}</b><span>${s[1]}</span></div><div class="b">${s[2].replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/\n/g,"<br>")}</div></div></button>`).join("");
+$$(".flip").forEach(f=>f.onclick=()=>f.classList.toggle("on"));
+
+const QZ = [
+  ["Predicting tomorrow’s temperature is…",["Regression","Classification","Neither"],0,"A temperature is a number, so it’s regression."],
+  ["In our salary model, which is the target?",["Age","Years of Experience","Salary"],2,"The target is the answer we want to predict."],
+  ["Why do we hold back a test set?",["To make training faster","To check the model on data it has never seen","To save memory"],1,"Only unseen data shows whether the model truly learned."],
+  ["The data had both “phD” and “PhD”. Which step fixes this?",["Cleaning","Train/test split","Training"],0,"Typos and inconsistent labels are a cleaning job."],
+  ["A classifier is 81% accurate. 62% of cases are the “no” class. What should you conclude?",["It’s excellent","It beats the 62% baseline, but only by 19 points","It’s no better than random"],1,"Always compare with the baseline of always guessing the majority."]
+];
+let qi=0,qs=0;
+function quiz(){
+  const el=$("#quiz");
+  if(qi>=QZ.length){ el.innerHTML=`<div class="center"><div class="eyebrow">Your score</div><div class="big">${qs} / ${QZ.length}</div><p style="color:var(--text2);margin:12px 0 22px">${qs===QZ.length?"Full marks. Now go build that Titanic model.":"Good start. Flip through the cheat sheet above and try again."}</p><button class="pill" id="qr">Try again</button></div>`; $("#qr").onclick=()=>{qi=0;qs=0;quiz();}; return; }
+  const q=QZ[qi];
+  el.innerHTML=`<div class="small">Question ${qi+1} of ${QZ.length}</div><div class="q">${q[0]}</div>${q[1].map((o,i)=>`<button class="o" data-i="${i}">${o}</button>`).join("")}<div class="ex"></div><button class="pill sm" id="qn" style="display:none">${qi===QZ.length-1?"See score":"Next"}</button>`;
+  $$("#quiz .o").forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.i; if(i===q[2]) qs++;
+    $$("#quiz .o").forEach(x=>{ x.disabled=true; if(+x.dataset.i===q[2]) x.classList.add("right"); }); if(i!==q[2]) b.classList.add("wrong");
+    $("#quiz .ex").textContent=q[3]; $("#qn").style.display="inline-block";
+    $("#qn").onclick=()=>{qi++;quiz();};
+  });
+}
+quiz();
+onScroll();
+</script>
+</body>
+</html>
